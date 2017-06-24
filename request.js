@@ -17,12 +17,19 @@ axios.interceptors.response.use(response => {//在这里对返回的数据进行
 
 export default {
     timeout:10000,//设置超时时间
+    timeCount:0,
     post(url, data) {
-
-        var self = this;
+        let self = this;
+        ++self.timeCount;
+        console.log(self.timeCount)
         let timer;//定时器
         timer = setTimeout(()=>{
-            alert('请求超时');
+            if(self.timeCount>=3){
+                alert('您的网络太慢了，请换个地方再试');
+            }else{
+                console.log('我虽超时，但是没超过三次，网速一般般');
+            }
+            
         },self.timeout);
 
         return axios({
@@ -36,13 +43,10 @@ export default {
                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
             }
         }).then(response => {
-            clearTimeout(timer);// 成功后 证明没超时  直接清除超时设置
             if (response && (response.status === 200 || response.status === 304 || response.status === 400)) {
-                if (typeof response.data === 'string') {
-                    return JSON.parse(response.data)
-                }else{
-                    return response.data
-                }
+                self.timeCount = 0;//成功后重置请求超时次数
+                clearTimeout(timer);// 成功后 证明没超时  直接清除超时设置
+                return typeof response.data === 'string'?JSON.parse(response.data):response.data
             }
         }).catch(err => {
             alert(err)
@@ -50,10 +54,15 @@ export default {
     },
     get(url, params) {
 
-        var self = this;
+        let self = this;
         let timer;//定时器
+        ++self.timeCount;
         timer = setTimeout(()=>{
-            alert('请求超时');
+             if(self.timeCount>=3){
+                alert('您的网络太慢了，请换个地方再试');
+            }else{
+                console.log('我虽超时，但是没超过三次，网速一般般');
+            }
         },self.timeout);
 
         return axios({
@@ -66,13 +75,10 @@ export default {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         }).then(response => {
-            clearTimeout(timer);// 成功后 证明没超时  直接清除超时设置
             if (response && (response.status === 200 || response.status === 304 || response.status === 400)) {
-                if (typeof response.data === 'string') {
-                    return JSON.parse(response.data)
-                }else{
-                    return response.data
-                }
+                self.timeCount = 0;//成功后重置请求超时次数
+                clearTimeout(timer);// 成功后 证明没超时  直接清除超时设置
+                return typeof response.data === 'string'?JSON.parse(response.data):response.data
             }
         }).catch(err => {
             alert(err)
